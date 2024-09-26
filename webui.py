@@ -6,6 +6,7 @@ import threading
 import time
 import requests
 import logging
+import bcrypt
 
 app = Flask(__name__)
 app.secret_key = 'arxdeari'
@@ -310,13 +311,15 @@ def register():
         user_config_file = os.path.join(user_folder, 'config.txt')
         with open(user_config_file, 'w') as configfile:
             configfile.write('')
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
         with open(os.path.join(USER_DIR, 'users.txt'), 'a') as f:
-            f.write(f"{username}:{password}\n")
+            f.write(f"{username}:{hashed_password.decode('utf-8')}\n")
 
         flash('Registration successful! Please login.')
         return redirect(url_for('login'))
     return render_template('register.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -327,13 +330,15 @@ def login():
         with open(os.path.join(USER_DIR, 'users.txt'), 'r') as f:
             users = dict(line.strip().split(':') for line in f)
 
-        if username in users and users[username] == password:
-            session['username'] = username
-            start_user_alarm_thread(username)
-            return redirect(url_for('index'))
-        else:
-            flash('Invalid username or password.')
-            return redirect(url_for('login'))
+        if username in users:
+            stored_password = users[username].encode('utf-8')
+            if bcrypt.checkpw(password.encode('utf-8'), stored_password):
+                session['username'] = username
+                start_user_alarm_thread(username)
+                return redirect(url_for('index'))
+        
+        flash('Invalid username or password.')
+        return redirect(url_for('login'))
     return render_template('login.html')
 
 @app.route('/logout')
