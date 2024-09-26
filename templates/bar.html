@@ -34,11 +34,30 @@
             .date-time {
                 color: #ffffff;
                 text-align: right;
+                display: flex;
+                align-items: center;
             }
 
             .date,
             .time {
                 display: block;
+            }
+
+            .logout-button {
+                margin-left: 20px;
+                padding: 5px 10px;
+                background-color: #ff5c82;
+                color: #ffffff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 1em;
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            .logout-button:hover {
+                background-color: #e54a72;
             }
 
             .container {
@@ -55,12 +74,11 @@
     </head>
     <body>
         <header class="top-bar">
-            <a href="{{ url_for('index') }}" class="home-link"
-                >OpenShockClock</a
-            >
+            <a href="{{ url_for('index') }}" class="home-link">OpenShockClock</a>
             <div class="date-time">
                 <span class="date" id="currentDate"></span>
                 <span class="time" id="currentTime"></span>
+                <button class="logout-button" id="logoutButton">Logout</button>
             </div>
         </header>
 
@@ -87,6 +105,10 @@
                 document.getElementById("currentDate").textContent = dateString;
                 document.getElementById("currentTime").textContent = timeString;
             }
+
+            document.getElementById("logoutButton").addEventListener("click", function() {
+                window.location.href = "/logout";
+            });
 
             updateDateTime();
             setInterval(updateDateTime, 1000);
